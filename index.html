@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#102a43"><title>CKG Data Converter</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="template-data.js"></script>
+</head>
+<body>
+<section id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand"><div class="brand-mark">C</div><div><strong>CKG Converter</strong><small>Data workspace</small></div></div>
+    <span class="step-tag">AKSES PENGGUNA</span>
+    <h1>Masuk ke akun</h1>
+    <p>Gunakan akun yang diberikan oleh administrator.</p>
+    <form id="loginForm">
+      <label class="field"><span>Email</span><input id="loginEmail" type="email" autocomplete="username" required placeholder="nama@email.com"></label>
+      <label class="field"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Masukkan password"></label>
+      <button class="btn btn-primary btn-wide" id="loginBtn" type="submit">Masuk</button>
+      <div id="loginError" class="auth-error" role="alert" hidden></div>
+    </form>
+    <small class="auth-foot">Pendaftaran akun mandiri dinonaktifkan.</small>
+  </div>
+</section>
+<div class="app-shell" id="appShell" hidden>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">C</div><div><strong>CKG Converter</strong><small>Data workspace</small></div></div>
+    <nav><button class="nav-item active" data-view="convert"><span>▦</span> Konversi Data</button><button class="nav-item" data-view="users" id="usersNav" hidden><span>♙</span> Manajemen Pengguna</button><button class="nav-item" data-view="guide"><span>ⓘ</span> Panduan</button></nav>
+    <div class="side-note"><span class="status-dot"></span> Pemrosesan lokal<br><small>Data peserta tidak dikirim ke server.</small></div>
+    <div class="version">WEB LIGHTWEIGHT · v0.1.4</div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><div class="eyebrow">WORKSPACE / DATA CONVERSION</div><h1 id="pageTitle">Konversi Data Peserta</h1></div><div class="top-actions"><div class="privacy-pill">🔒 Data di perangkat ini</div><span id="userIdentity" class="user-identity"></span><button id="logoutBtn" class="btn btn-quiet btn-logout" type="button">Keluar</button></div></header>
+    <div id="backendStatus" class="backend-status pending" hidden>Memverifikasi akun ke backend…</div>
+    <section id="convertView">
+      <div class="intro"><div><h2>Siapkan data CKG dengan lebih praktis.</h2><p>Masukkan peserta, periksa kelengkapan, lalu unduh Excel sesuai format ekstensi.</p></div><div class="intro-icon">↗</div></div>
+      <div class="setup-grid">
+        <label class="field"><span>Jenis CKG</span><select id="category"><option value="umum">CKG Umum</option><option value="sekolah">CKG Sekolah</option></select></label>
+        <label class="field"><span>Format ekspor</span><select id="mode"><option value="local">Local</option><option value="non_local">Non-Local</option></select></label>
+      </div>
+      <div class="workspace-grid">
+        <section class="panel form-panel">
+          <div class="panel-head"><div><span class="step-tag">INPUT PESERTA</span><h3 id="formTitle">Identitas Peserta</h3></div><span class="required-note">* Wajib sesuai data sumber</span></div>
+          <form id="participantForm">
+            <div class="form-section"><h4>Identitas peserta</h4><div class="form-grid" id="identityFields"></div></div>
+            <div class="form-section" id="guardianSection"><h4>Data wali <small>Diisi jika peserta menggunakan jalur tanpa NIK</small></h4><div class="form-grid" id="guardianFields"></div></div>
+            <div class="form-section" id="schoolSection"><h4>Informasi sekolah</h4><div class="form-grid" id="schoolFields"></div></div>
+            <div class="form-section" id="addressSection"><h4>Alamat domisili</h4><div class="form-grid" id="addressFields"></div></div>
+            <div class="form-section"><h4>Data pendukung & pemeriksaan</h4><div class="form-grid" id="healthFields"></div></div>
+            <div class="form-actions"><button type="button" class="btn btn-quiet" id="resetBtn">Bersihkan</button><button type="submit" class="btn btn-primary" id="saveBtn">＋ Tambahkan peserta</button></div>
+          </form>
+        </section>
+        <section class="panel list-panel">
+          <div class="panel-head"><div><span class="step-tag">DAFTAR PESERTA</span><h3>Peserta dalam sesi ini</h3></div><span class="count-badge" id="countBadge">0</span></div>
+          <div class="list-tools"><input id="searchInput" type="search" placeholder="Cari nama atau NIK..."><span id="validCount">Belum ada data</span></div>
+          <div id="participantList" class="participant-list"><div class="empty-state"><div>▤</div><strong>Belum ada peserta</strong><p>Isi formulir di samping, lalu tekan Tambahkan peserta.</p></div></div>
+          <div class="list-footer"><span id="listSummary">0 peserta ditambahkan</span><button class="text-btn" id="clearAllBtn">Hapus semua</button></div>
+          <div class="export-box"><div><span class="step-tag">LANGKAH TERAKHIR</span><h3>Ekspor ke Excel</h3><p>File akan dibuat di browser perangkat ini.</p></div><label class="field"><span>Nama file</span><input id="filename" value="template_ckg_umum_local" maxlength="90"></label><button class="btn btn-primary btn-wide" id="exportBtn" disabled>↓ Unduh Excel (.xlsx)</button><small class="export-hint" id="exportHint">Tambahkan peserta terlebih dahulu.</small></div>
+        </section>
+      </div>
+      <footer class="footer-note">CKG Data Converter · Prototype 0.1.4 <span>Gunakan data dummy saat pengujian.</span></footer>
+    </section>
+    <section id="usersView" class="panel users-panel" hidden>
+      <div class="panel-head"><div><span class="step-tag">ADMINISTRASI</span><h3>Manajemen Pengguna</h3><p class="muted">Kelola akun sesuai kewenangan role kamu.</p></div><button class="btn btn-primary" id="refreshUsersBtn" type="button">↻ Muat ulang</button></div>
+      <div id="usersNotice" class="notice" hidden></div>
+      <div class="user-create-grid">
+        <label class="field"><span>Email</span><input id="newUserEmail" type="email" placeholder="nama@email.com" required></label>
+        <label class="field"><span>Role</span><select id="newUserRole"><option value="PETUGAS">Petugas</option><option value="ADMIN" id="adminRoleOption">Admin</option></select></label>
+        <label class="field"><span>Password (min. 10 karakter)</span><input id="newUserPassword" type="password" minlength="10" autocomplete="new-password" required></label>
+        <label class="field"><span>Konfirmasi password</span><input id="newUserPassword2" type="password" minlength="10" autocomplete="new-password" required></label>
+        <div class="field user-create-action"><span>&nbsp;</span><button class="btn btn-primary" id="createUserBtn" type="button">＋ Buat akun</button></div>
+      </div>
+      <div class="table-wrap"><table class="users-table"><thead><tr><th>Pengguna</th><th>Role</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="usersTableBody"><tr><td colspan="5">Memuat daftar pengguna…</td></tr></tbody></table></div>
+      <small class="muted">Password hanya dikirim ke Firebase Authentication dan tidak disimpan di Google Sheets. Penghapusan di sini bersifat logis (akses aplikasi ditolak); akun Firebase tidak dihapus permanen.</small>
+    </section>
+    <section id="guideView" class="panel guide-panel" hidden><span class="step-tag">PANDUAN SINGKAT</span><h2>Cara menggunakan converter</h2><ol><li>Pilih jenis CKG: Umum atau Sekolah.</li><li>Pilih format Local atau Non-Local sesuai ekstensi tujuan.</li><li>Isi data peserta sesuai sumber. Data yang tidak diketahui biarkan kosong.</li><li>Tekan <b>Tambahkan peserta</b>. Anda bisa mengubah, menggandakan, atau menghapus peserta.</li><li>Periksa daftar peserta dan nama file, lalu tekan <b>Unduh Excel</b>.</li></ol><div class="notice"><b>Privasi:</b> prototype ini memproses data di browser dan tidak mengunggah data peserta. Data sesi berada di memori halaman; muat ulang halaman untuk menghapusnya.</div><div class="notice warn"><b>Catatan:</b> ini adalah prototype UI dan ekspor. Login Firebase dan verifikasi role melalui Google Apps Script telah diaktifkan. Pengelolaan akun Admin/Petugas belum tersedia pada versi ini.</div><button class="btn btn-primary" id="backBtn">Kembali ke konversi</button></section>
+  </main>
+</div>
+<div id="toast" class="toast" role="status"></div>
+<script src="app.js"></script>\n<script type="module" src="firebase-auth.js"></script>
+</body></html>
